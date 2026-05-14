@@ -1,5 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
@@ -41,6 +42,7 @@ app.Urls.Add($"http://*:{port}");
 
 app.MapGet("/", () => "OK");
 app.MapGet("/health", () => Results.Ok("OK"));
+app.MapControllers();
 
 app.Run();
 
