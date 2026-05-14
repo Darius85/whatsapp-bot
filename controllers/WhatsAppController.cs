@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 namespace WhatsAppBotApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/whatsapp")]
 public class WhatsAppController : ControllerBase
 {
     private const string VERIFY_TOKEN = "token_chatbot_dario";
@@ -27,7 +27,7 @@ public class WhatsAppController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> ReceiveMessage()
     {
-        using var reader = new StreamReader(Request.Body, Encoding.UTF8);
+        using var reader = new StreamReader(Request.Body);
         var body = await reader.ReadToEndAsync();
 
         Console.WriteLine(body);
