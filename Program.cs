@@ -14,7 +14,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 var summaries = new[]
 {
@@ -38,6 +38,9 @@ app.MapGet("/weatherforecast", () =>
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 
 app.Urls.Add($"http://*:{port}");
+
+app.MapGet("/", () => "OK");
+app.MapGet("/health", () => Results.Ok("OK"));
 
 app.Run();
 
