@@ -8,7 +8,7 @@ namespace WhatsAppBotApi.Controllers;
 [Route("api/[controller]")]
 public class WhatsAppController : ControllerBase
 {
-    private const string VERIFY_TOKEN = "mi_token_seguro";
+    private const string VERIFY_TOKEN = "token_chatbot_dario";
 
     [HttpGet]
     public IActionResult Verify(
