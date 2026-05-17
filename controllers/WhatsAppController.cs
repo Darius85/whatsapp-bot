@@ -8,13 +8,13 @@ namespace WhatsAppBotApi.Controllers
     [Route("api/whatsapp")]
     public class WhatsAppController : ControllerBase
     {
-          private const string VERIFY_TOKEN = "token_chatbot_dario";
+        private const string VERIFY_TOKEN = "token_chatbot_dario";
 
-        // Token temporal de Meta
-        private readonly string ACCESS_TOKEN = Environment.GetEnvironmentVariable("WHATSAPP_TOKEN")!;
+        // ⚠️ REEMPLAZA POR TU TOKEN NUEVO
+        private const string ACCESS_TOKEN = "TU_ACCESS_TOKEN";
 
-        // Identificador del número (sale en Meta)
-        private readonly string PHONE_NUMBER_ID = Environment.GetEnvironmentVariable("WHATSAPP_PHONE_ID")!;
+        // ⚠️ TU PHONE NUMBER ID
+        private const string PHONE_NUMBER_ID = "1098455723356170";
 
         [HttpGet]
         public IActionResult Verify(
@@ -23,7 +23,9 @@ namespace WhatsAppBotApi.Controllers
             [FromQuery(Name = "hub.challenge")] string challenge)
         {
             if (mode == "subscribe" && token == VERIFY_TOKEN)
+            {
                 return Ok(challenge);
+            }
 
             return Unauthorized();
         }
@@ -40,69 +42,103 @@ namespace WhatsAppBotApi.Controllers
             {
                 var json = JObject.Parse(body);
 
-                var from = json["entry"]?[0]?["changes"]?[0]?["value"]?["messages"]?[0]?["from"]?.ToString();
-
-                var textMessage = json["entry"]?[0]?["changes"]?[0]?["value"]?["messages"]?[0]?["text"]?["body"]?.ToString();
-
-                var selectedId = json["entry"]?[0]?["changes"]?[0]?["value"]?["messages"]?[0]?["interactive"]?["list_reply"]?["id"]?.ToString();
+                var from =
+                    json["entry"]?[0]?["changes"]?[0]?["value"]?["messages"]?[0]?["from"]
+                    ?.ToString();
 
                 if (string.IsNullOrEmpty(from))
                     return Ok();
+
+                var textMessage =
+                    json["entry"]?[0]?["changes"]?[0]?["value"]?["messages"]?[0]?["text"]?["body"]
+                    ?.ToString();
+
+                var selectedId =
+                    json["entry"]?[0]?["changes"]?[0]?["value"]?["messages"]?[0]?["interactive"]?["list_reply"]?["id"]
+                    ?.ToString();
 
                 var message = !string.IsNullOrEmpty(selectedId)
                     ? selectedId.ToLower().Trim()
                     : textMessage?.ToLower().Trim();
 
+                Console.WriteLine($"Mensaje recibido: {message}");
+
                 if (string.IsNullOrEmpty(message))
                     return Ok();
 
-                if (message.Contains("hola") || message.Contains("menu") || message.Contains("menú"))
+                // =========================
+                // MENU PRINCIPAL
+                // =========================
+                if (message.Contains("hola")
+                    || message.Contains("menu")
+                    || message.Contains("menú")
+                    || message.Contains("programas"))
                 {
+                    await SendWelcomeImage(from);
+
+                    await Task.Delay(1500);
+
                     await SendProgramList(from);
                 }
-                else if (message == "programa_1" || message == "1" || message.Contains("programa 1"))
+
+                // =========================
+                // PINTURA
+                // =========================
+                else if (message == "pintura")
                 {
-                    await SendTextMessage(from,
-                        "📌 *Conect Internet*\n\n" +
-                        "Aquí va la información del Programa 1:\n\n" +
-                        "✅ Requisitos\n" +
-                        "✅ Beneficios\n" +
-                        "✅ Fechas\n" +
-                        "✅ Cómo registrarse\n\n" +
-                        "Escribe *menú* para volver a ver los programas.");
+                    await SendTextMessage(
+                        from,
+                        "🎨 *Programa Pintura*\n\n" +
+                        "✅ Apoyo para pintar viviendas.\n" +
+                        "✅ Requisitos básicos.\n" +
+                        "✅ Registro disponible.\n\n" +
+                        "Escribe *menú* para volver.");
                 }
-                else if (message == "programa_2" || message == "2" || message.Contains("programa 2"))
+
+                // =========================
+                // CONECTABASCO
+                // =========================
+                else if (message == "conectabasco")
                 {
-                    await SendTextMessage(from,
-                        "📌 *Programa para pintura*\n\n" +
-                        "Aquí va la información del Programa 2.\n\n" +
-                        "Escribe *menú* para volver a ver los programas.");
+                    await SendTextMessage(
+                        from,
+                        "🔌 *ConecTabasco*\n\n" +
+                        "✅ Programa de conectividad.\n" +
+                        "✅ Acceso a beneficios tecnológicos.\n\n" +
+                        "Escribe *menú* para volver.");
                 }
-                else if (message == "programa_3" || message == "3" || message.Contains("programa 3"))
+
+                // =========================
+                // MENTE 360
+                // =========================
+                else if (message == "mente360")
                 {
-                    await SendTextMessage(from,
-                        "📌 *Programa para apoyos*\n\n" +
-                        "Aquí va la información del Programa 3.\n\n" +
-                        "Escribe *menú* para volver a ver los programas.");
+                    await SendTextMessage(
+                        from,
+                        "🧠 *Mente 360*\n\n" +
+                        "✅ Atención y orientación.\n" +
+                        "✅ Bienestar emocional.\n\n" +
+                        "Escribe *menú* para volver.");
                 }
-                else if (message == "programa_4" || message == "4" || message.Contains("programa 4"))
+
+                // =========================
+                // AUDIENCIA
+                // =========================
+                else if (message == "audiencia")
                 {
-                    await SendTextMessage(from,
-                        "📌 *PROGRAMA 4*\n\n" +
-                        "Aquí va la información del Programa 4.\n\n" +
-                        "Escribe *menú* para volver a ver los programas.");
+                    await SendTextMessage(
+                        from,
+                        "📣 *Audiencia*\n\n" +
+                        "✅ Solicita audiencia.\n" +
+                        "✅ Consulta información.\n\n" +
+                        "Escribe *menú* para volver.");
                 }
-                else if (message == "programa_5" || message == "5" || message.Contains("programa 5"))
-                {
-                    await SendTextMessage(from,
-                        "📌 *PROGRAMA 5*\n\n" +
-                        "Aquí va la información del Programa 5.\n\n" +
-                        "Escribe *menú* para volver a ver los programas.");
-                }
+
                 else
                 {
-                    await SendTextMessage(from,
-                        "No entendí tu mensaje.\n\nEscribe *hola* o *menú* para ver los programas disponibles.");
+                    await SendTextMessage(
+                        from,
+                        "❌ No entendí tu mensaje.\n\nEscribe *hola* o *menú*.");
                 }
             }
             catch (Exception ex)
@@ -113,6 +149,52 @@ namespace WhatsAppBotApi.Controllers
             return Ok();
         }
 
+        // =========================================
+        // IMAGEN DE BIENVENIDA
+        // =========================================
+        private async Task SendWelcomeImage(string to)
+        {
+            using var client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add(
+                "Authorization",
+                $"Bearer {ACCESS_TOKEN}");
+
+            var payload = new
+            {
+                messaging_product = "whatsapp",
+                to = to,
+                type = "image",
+                image = new
+                {
+                    link = "https://whatsapp-bot-4wyj.onrender.com/assets/jose.jpg",
+                    caption =
+                        "👋 Hola, soy tu amigo José.\n\n" +
+                        "Te ayudaré a consultar los programas sociales disponibles."
+                }
+            };
+
+            var json =
+                Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+
+            var content = new StringContent(
+                json,
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PostAsync(
+                $"https://graph.facebook.com/v25.0/{PHONE_NUMBER_ID}/messages",
+                content);
+
+            var result =
+                await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"Image response: {result}");
+        }
+
+        // =========================================
+        // LISTA DE PROGRAMAS
+        // =========================================
         private async Task SendProgramList(string to)
         {
             using var client = new HttpClient();
@@ -129,58 +211,62 @@ namespace WhatsAppBotApi.Controllers
                 interactive = new
                 {
                     type = "list",
+
                     header = new
                     {
                         type = "text",
-                        text = "Programas sociales"
+                        text = "Programas Sociales"
                     },
+
                     body = new
                     {
-                        text = "Selecciona el programa que deseas consultar:"
+                        text =
+                            "Selecciona el programa que deseas consultar:"
                     },
+
                     footer = new
                     {
                         text = "Toca una opción para continuar"
                     },
+
                     action = new
                     {
                         button = "Ver programas",
+
                         sections = new[]
                         {
                             new
                             {
                                 title = "Programas disponibles",
+
                                 rows = new[]
                                 {
                                     new
                                     {
-                                        id = "programa_1",
-                                        title = "Programa 1",
-                                        description = "Información del Programa 1"
+                                        id = "pintura",
+                                        title = "Pintura",
+                                        description = "Apoyo para viviendas"
                                     },
+
                                     new
                                     {
-                                        id = "programa_2",
-                                        title = "Programa 2",
-                                        description = "Información del Programa 2"
+                                        id = "conectabasco",
+                                        title = "ConecTabasco",
+                                        description = "Conectividad y apoyo"
                                     },
+
                                     new
                                     {
-                                        id = "programa_3",
-                                        title = "Programa 3",
-                                        description = "Información del Programa 3"
+                                        id = "mente360",
+                                        title = "Mente 360",
+                                        description = "Bienestar y atención"
                                     },
+
                                     new
                                     {
-                                        id = "programa_4",
-                                        title = "Programa 4",
-                                        description = "Información del Programa 4"
-                                    },
-                                    new
-                                    {
-                                        id = "programa_5",
-                                        title = "Programa 5",
-                                        description = "Información del Programa 5"
+                                        id = "audiencia",
+                                        title = "Audiencia",
+                                        description = "Solicita audiencia"
                                     }
                                 }
                             }
@@ -189,7 +275,8 @@ namespace WhatsAppBotApi.Controllers
                 }
             };
 
-            var json = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var json =
+                Newtonsoft.Json.JsonConvert.SerializeObject(payload);
 
             var content = new StringContent(
                 json,
@@ -200,12 +287,18 @@ namespace WhatsAppBotApi.Controllers
                 $"https://graph.facebook.com/v25.0/{PHONE_NUMBER_ID}/messages",
                 content);
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result =
+                await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine($"WhatsApp list response: {result}");
+            Console.WriteLine($"List response: {result}");
         }
 
-        private async Task SendTextMessage(string to, string text)
+        // =========================================
+        // MENSAJES DE TEXTO
+        // =========================================
+        private async Task SendTextMessage(
+            string to,
+            string text)
         {
             using var client = new HttpClient();
 
@@ -224,7 +317,8 @@ namespace WhatsAppBotApi.Controllers
                 }
             };
 
-            var json = Newtonsoft.Json.JsonConvert.SerializeObject(payload);
+            var json =
+                Newtonsoft.Json.JsonConvert.SerializeObject(payload);
 
             var content = new StringContent(
                 json,
@@ -235,9 +329,10 @@ namespace WhatsAppBotApi.Controllers
                 $"https://graph.facebook.com/v25.0/{PHONE_NUMBER_ID}/messages",
                 content);
 
-            var result = await response.Content.ReadAsStringAsync();
+            var result =
+                await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine($"WhatsApp text response: {result}");
+            Console.WriteLine($"Text response: {result}");
         }
     }
 }
