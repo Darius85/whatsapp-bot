@@ -169,7 +169,7 @@ namespace WhatsAppBotApi.Controllers
                 {
                     link = "https://whatsapp-bot-4wyj.onrender.com/assets/Erubiel.jpeg",
                     caption =
-                        "👋 Hola, soy tu amigo José.\n\n" +
+                        "👋 Hola, soy tu amigo Erubiel.\n\n" +
                         "Te ayudaré a consultar los programas sociales disponibles."
                 }
             };
