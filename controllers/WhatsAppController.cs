@@ -11,7 +11,7 @@ namespace WhatsAppBotApi.Controllers
         private const string VERIFY_TOKEN = "token_chatbot_dario";
 
         // ⚠️ REEMPLAZA POR TU TOKEN NUEVO
-        private const string ACCESS_TOKEN = "TU_ACCESS_TOKEN";
+        private readonly string ACCESS_TOKEN = Environment.GetEnvironmentVariable("WHATSAPP_TOKEN") ?? "";
 
         // ⚠️ TU PHONE NUMBER ID
         private const string PHONE_NUMBER_ID = "1098455723356170";
@@ -167,7 +167,7 @@ namespace WhatsAppBotApi.Controllers
                 type = "image",
                 image = new
                 {
-                    link = "https://whatsapp-bot-4wyj.onrender.com/assets/jose.jpg",
+                    link = "https://whatsapp-bot-4wyj.onrender.com/assets/Erubiel.jpeg",
                     caption =
                         "👋 Hola, soy tu amigo José.\n\n" +
                         "Te ayudaré a consultar los programas sociales disponibles."
