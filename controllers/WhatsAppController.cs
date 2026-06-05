@@ -25,6 +25,10 @@ namespace WhatsAppBotApi.Controllers
             Environment.GetEnvironmentVariable("WHATSAPP_WELCOME_IMAGE_URL")
             ?? "https://autotyre.com.mx/assets/auto-tyre-welcome.jpg";
 
+        private readonly string ADVISOR_WHATSAPP_NUMBER =
+            Environment.GetEnvironmentVariable("WHATSAPP_ADVISOR_NUMBER")
+            ?? "525579640165";
+
         private const string GRAPH_VERSION = "v25.0";
 
         // =========================================
@@ -101,10 +105,10 @@ namespace WhatsAppBotApi.Controllers
                 Console.WriteLine($"Type: {messageType}");
                 Console.WriteLine($"Message: {message}");
 
+                await MarkMessageAsRead(messageNode["id"]?.ToString());
+
                 if (string.IsNullOrWhiteSpace(message))
                     return Ok();
-
-                await MarkMessageAsRead(messageNode["id"]?.ToString());
 
                 // =========================================
                 // MENÚ PRINCIPAL
@@ -171,6 +175,17 @@ namespace WhatsAppBotApi.Controllers
                 }
 
                 // =========================================
+                // MODELOS DE FRANQUICIA
+                // =========================================
+                else if (message == "franquicia_express" ||
+                         message == "franquicia_premium" ||
+                         message == "franquicia_diamante" ||
+                         message == "franquicia_movil")
+                {
+                    await SendFranchiseModelDetail(from, message);
+                }
+
+                // =========================================
                 // AUXILIO VIAL
                 // =========================================
                 else if (message == "auxilio_vial" ||
@@ -192,7 +207,7 @@ namespace WhatsAppBotApi.Controllers
                          message.Contains("persona") ||
                          message.Contains("agente"))
                 {
-                    await SendAdvisorMessage(from);
+                    await SendAdvisorCtaMessage(from);
                 }
 
                 // =========================================
@@ -540,7 +555,7 @@ namespace WhatsAppBotApi.Controllers
                     "📐 Espacio requerido: *80 a 120 m²*\n" +
                     "🛞 Inventario inicial: *150 llantas*\n" +
                     "🏗️ Ideal para zonas urbanas de alto flujo.\n\n" +
-                    "Para iniciar el proceso escribe *Contactar asesor*.",
+                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
 
                 "franquicia_premium" =>
                     "⭐ *Modelo Premium Auto Tyre*\n\n" +
@@ -548,7 +563,7 @@ namespace WhatsAppBotApi.Controllers
                     "📐 Espacio requerido: *150 a 200 m²*\n" +
                     "🛞 Inventario inicial: *200 llantas*\n" +
                     "🛋️ Incluye sala de espera.\n\n" +
-                    "Para iniciar el proceso escribe *Contactar asesor*.",
+                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
 
                 "franquicia_diamante" =>
                     "💎 *Modelo Diamante Auto Tyre*\n\n" +
@@ -556,7 +571,7 @@ namespace WhatsAppBotApi.Controllers
                     "📐 Espacio requerido: *200 a 350 m²*\n" +
                     "🛞 Inventario inicial: *250 llantas*\n" +
                     "🏗️ Mayor capacidad operativa y servicios especializados.\n\n" +
-                    "Para iniciar el proceso escribe *Contactar asesor*.",
+                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
 
                 "franquicia_movil" =>
                     "🚐 *Modelo Móvil Auto Tyre*\n\n" +
@@ -566,13 +581,15 @@ namespace WhatsAppBotApi.Controllers
                     "✅ Imagen corporativa\n" +
                     "✅ Red de franquicias\n\n" +
                     "⚠️ No incluye la camioneta.\n\n" +
-                    "Para iniciar el proceso escribe *Contactar asesor*.",
+                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
 
                 _ =>
                     "Selecciona un modelo válido desde el menú de franquicias."
             };
 
             await SendTextMessage(to, text);
+            await Task.Delay(600);
+            await SendAdvisorCtaMessage(to);
         }
 
         // =========================================
@@ -595,23 +612,59 @@ namespace WhatsAppBotApi.Controllers
         }
 
         // =========================================
-        // CONTACTAR ASESOR
+        // CONTACTAR ASESOR - BOTÓN PROFESIONAL CTA URL
         // =========================================
-        private async Task SendAdvisorMessage(string to)
+        private async Task SendAdvisorCtaMessage(string to)
         {
-            var text =
-                "👨‍💼 *Contactar asesor Auto Tyre*\n\n" +
-                "Con gusto te atenderemos.\n\n" +
-                "Por favor envíanos:\n\n" +
-                "👤 Nombre completo\n" +
-                "📞 Teléfono\n" +
-                "📍 Ciudad/estado\n" +
-                "📝 Motivo de contacto\n\n" +
-                "Ejemplo:\n" +
-                "*Carlos Ramírez, 55..., CDMX, quiero cotizar 4 llantas.*\n\n" +
-                "También puedes llamar al *55 7964 0165*.";
+            var advisorText =
+                "Hola, quiero hablar con un asesor de Auto Tyre.";
 
-            await SendTextMessage(to, text);
+            var advisorUrl =
+                $"https://wa.me/{ADVISOR_WHATSAPP_NUMBER}?text={Uri.EscapeDataString(advisorText)}";
+
+            var payload = new
+            {
+                messaging_product = "whatsapp",
+                recipient_type = "individual",
+                to,
+                type = "interactive",
+                interactive = new
+                {
+                    type = "cta_url",
+                    header = new
+                    {
+                        type = "text",
+                        text = "Asesor Auto Tyre"
+                    },
+                    body = new
+                    {
+                        text =
+                            "👨‍💼 *Contactar asesor Auto Tyre*\n\n" +
+                            "Un asesor puede apoyarte con:\n\n" +
+                            "🔎 Cotización de llantas\n" +
+                            "📍 Sucursal más cercana\n" +
+                            "🚚 Flotillas\n" +
+                            "🏁 Franquicias\n" +
+                            "🛟 Auxilio vial\n\n" +
+                            "Presiona el botón para abrir el chat directo con un asesor."
+                    },
+                    footer = new
+                    {
+                        text = "Atención personalizada Auto Tyre"
+                    },
+                    action = new
+                    {
+                        name = "cta_url",
+                        parameters = new
+                        {
+                            display_text = "Chatear con asesor",
+                            url = advisorUrl
+                        }
+                    }
+                }
+            };
+
+            await SendPayload(payload, "Advisor CTA URL response");
         }
 
         // =========================================
@@ -715,6 +768,11 @@ namespace WhatsAppBotApi.Controllers
             var result = await response.Content.ReadAsStringAsync();
 
             Console.WriteLine($"{logName}: {result}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"ERROR HTTP {(int)response.StatusCode}: {result}");
+            }
         }
     }
 }
