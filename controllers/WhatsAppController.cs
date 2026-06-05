@@ -116,18 +116,21 @@ namespace WhatsAppBotApi.Controllers
                 if (IsMenuIntent(message))
                 {
                     await SendWelcomeMessage(from);
-                    await Task.Delay(800);
-                    await SendMainMenu(from);
+                    await Task.Delay(700);
+                    await SendMainMenuButtons(from);
                 }
 
                 // =========================================
-                // COMPRAR / COTIZAR LLANTAS
+                // COTIZAR
                 // =========================================
-                else if (message == "comprar_llantas" ||
-                         message.Contains("comprar") ||
+                else if (message == "cotizar" ||
+                         message == "comprar_llantas" ||
                          message.Contains("cotizar") ||
+                         message.Contains("comprar") ||
                          message.Contains("llanta") ||
-                         message.Contains("llantas"))
+                         message.Contains("llantas") ||
+                         message.Contains("precio") ||
+                         message.Contains("precios"))
                 {
                     await SendTireQuoteMenu(from);
                 }
@@ -141,51 +144,6 @@ namespace WhatsAppBotApi.Controllers
                 }
 
                 // =========================================
-                // BUSCAR SUCURSAL
-                // =========================================
-                else if (message == "buscar_sucursal" ||
-                         message.Contains("sucursal") ||
-                         message.Contains("ubicacion") ||
-                         message.Contains("ubicación"))
-                {
-                    await SendBranchSearchMessage(from);
-                }
-
-                // =========================================
-                // FLOTILLAS
-                // =========================================
-                else if (message == "flotillas" ||
-                         message.Contains("flotilla") ||
-                         message.Contains("empresa") ||
-                         message.Contains("unidades"))
-                {
-                    await SendFleetMessage(from);
-                }
-
-                // =========================================
-                // FRANQUICIAS / EXPANSIÓN
-                // =========================================
-                else if (message == "franquicias" ||
-                         message == "expansion" ||
-                         message == "expansión" ||
-                         message.Contains("franquicia") ||
-                         message.Contains("invertir"))
-                {
-                    await SendFranchiseMessage(from);
-                }
-
-                // =========================================
-                // MODELOS DE FRANQUICIA
-                // =========================================
-                else if (message == "franquicia_express" ||
-                         message == "franquicia_premium" ||
-                         message == "franquicia_diamante" ||
-                         message == "franquicia_movil")
-                {
-                    await SendFranchiseModelDetail(from, message);
-                }
-
-                // =========================================
                 // AUXILIO VIAL
                 // =========================================
                 else if (message == "auxilio_vial" ||
@@ -193,15 +151,17 @@ namespace WhatsAppBotApi.Controllers
                          message.Contains("asistencia") ||
                          message.Contains("vial") ||
                          message.Contains("ponchada") ||
-                         message.Contains("ponchado"))
+                         message.Contains("ponchado") ||
+                         message.Contains("emergencia"))
                 {
                     await SendRoadAssistanceMessage(from);
                 }
 
                 // =========================================
-                // CONTACTAR ASESOR
+                // ASESOR
                 // =========================================
-                else if (message == "contactar_asesor" ||
+                else if (message == "asesor" ||
+                         message == "contactar_asesor" ||
                          message.Contains("asesor") ||
                          message.Contains("humano") ||
                          message.Contains("persona") ||
@@ -223,7 +183,7 @@ namespace WhatsAppBotApi.Controllers
                         "📞 *Call Center:*\n" +
                         "Lunes a viernes: 8:00 am - 7:00 pm\n" +
                         "Sábado: 8:00 am - 3:00 pm\n\n" +
-                        "Para consultar una sucursal específica, selecciona *Buscar sucursal* en el menú.\n\n" +
+                        "Para atención personalizada, selecciona *Asesor*.\n\n" +
                         "Escribe *menú* para volver al inicio.");
                 }
 
@@ -235,13 +195,10 @@ namespace WhatsAppBotApi.Controllers
                     await SendTextMessage(
                         from,
                         "No logré identificar tu solicitud.\n\n" +
-                        "Puedes escribir *menú* para ver las opciones disponibles:\n\n" +
-                        "🔎 Comprar llantas\n" +
-                        "📍 Buscar sucursal\n" +
-                        "🚚 Flotillas\n" +
-                        "🏁 Franquicias\n" +
-                        "🛟 Auxilio vial\n" +
-                        "👨‍💼 Contactar asesor");
+                        "Puedes seleccionar una opción del menú principal:");
+                    
+                    await Task.Delay(600);
+                    await SendMainMenuButtons(from);
                 }
             }
             catch (Exception ex)
@@ -289,22 +246,19 @@ namespace WhatsAppBotApi.Controllers
         {
             var text =
                 "👋 ¡Hola! Bienvenido a *Auto Tyre*.\n\n" +
-                "Soy el asistente virtual de Auto Tyre y puedo ayudarte con:\n\n" +
-                "🔎 Cotización de llantas\n" +
-                "📍 Búsqueda de sucursales\n" +
-                "🚚 Atención a flotillas\n" +
-                "🏁 Información de franquicias\n" +
-                "🛟 Auxilio vial\n" +
-                "👨‍💼 Contactar a un asesor\n\n" +
-                "Selecciona una opción del menú.";
+                "Soy tu asistente virtual y puedo ayudarte rápido con:\n\n" +
+                "🛞 *Cotizar llantas*\n" +
+                "🛟 *Auxilio vial*\n" +
+                "👨‍💼 *Hablar con un asesor*\n\n" +
+                "Selecciona una opción para continuar.";
 
             await SendTextMessage(to, text);
         }
 
         // =========================================
-        // MENÚ PRINCIPAL INTERACTIVO
+        // MENÚ PRINCIPAL CON 3 BOTONES DIRECTOS
         // =========================================
-        private async Task SendMainMenu(string to)
+        private async Task SendMainMenuButtons(string to)
         {
             var payload = new
             {
@@ -313,7 +267,7 @@ namespace WhatsAppBotApi.Controllers
                 type = "interactive",
                 interactive = new
                 {
-                    type = "list",
+                    type = "button",
                     header = new
                     {
                         type = "text",
@@ -321,58 +275,45 @@ namespace WhatsAppBotApi.Controllers
                     },
                     body = new
                     {
-                        text = "¿Qué necesitas hacer hoy?"
+                        text =
+                            "¿Qué necesitas hacer hoy?\n\n" +
+                            "🛞 *Cotizar:* precios, medidas y disponibilidad.\n" +
+                            "🛟 *Auxilio vial:* apoyo por llanta ponchada o emergencia.\n" +
+                            "👨‍💼 *Asesor:* atención personalizada."
                     },
                     footer = new
                     {
-                        text = "Selecciona una opción para continuar"
+                        text = "Selecciona una opción"
                     },
                     action = new
                     {
-                        button = "Ver opciones",
-                        sections = new[]
+                        buttons = new[]
                         {
                             new
                             {
-                                title = "Atención Auto Tyre",
-                                rows = new[]
+                                type = "reply",
+                                reply = new
                                 {
-                                    new
-                                    {
-                                        id = "comprar_llantas",
-                                        title = "Comprar llantas",
-                                        description = "Cotiza por medida o vehículo"
-                                    },
-                                    new
-                                    {
-                                        id = "buscar_sucursal",
-                                        title = "Buscar sucursal",
-                                        description = "Encuentra atención cercana"
-                                    },
-                                    new
-                                    {
-                                        id = "flotillas",
-                                        title = "Flotillas",
-                                        description = "Atención para empresas"
-                                    },
-                                    new
-                                    {
-                                        id = "franquicias",
-                                        title = "Franquicias",
-                                        description = "Invierte en Auto Tyre"
-                                    },
-                                    new
-                                    {
-                                        id = "auxilio_vial",
-                                        title = "Auxilio vial",
-                                        description = "Soporte en carretera"
-                                    },
-                                    new
-                                    {
-                                        id = "contactar_asesor",
-                                        title = "Contactar asesor",
-                                        description = "Habla con una persona"
-                                    }
+                                    id = "cotizar",
+                                    title = "Cotizar"
+                                }
+                            },
+                            new
+                            {
+                                type = "reply",
+                                reply = new
+                                {
+                                    id = "auxilio_vial",
+                                    title = "Auxilio vial"
+                                }
+                            },
+                            new
+                            {
+                                type = "reply",
+                                reply = new
+                                {
+                                    id = "asesor",
+                                    title = "Asesor"
                                 }
                             }
                         }
@@ -380,7 +321,7 @@ namespace WhatsAppBotApi.Controllers
                 }
             };
 
-            await SendPayload(payload, "Main menu response");
+            await SendPayload(payload, "Main menu buttons response");
         }
 
         // =========================================
@@ -389,20 +330,24 @@ namespace WhatsAppBotApi.Controllers
         private async Task SendTireQuoteMenu(string to)
         {
             var text =
-                "🔎 *Cotización de llantas*\n\n" +
+                "🛞 *Cotización de llantas Auto Tyre*\n\n" +
                 "Para cotizar más rápido, envíame la medida de tu llanta.\n\n" +
                 "Ejemplos:\n" +
-                "• 205/55 R16\n" +
-                "• 225/60 R17\n" +
-                "• 265/70 R16\n\n" +
-                "También puedes enviarme:\n" +
-                "🚗 Marca del vehículo\n" +
+                "• *205/55 R16*\n" +
+                "• *225/60 R17*\n" +
+                "• *265/70 R16*\n\n" +
+                "También puedes enviarme los datos de tu vehículo:\n\n" +
+                "🚗 Marca\n" +
                 "🚙 Modelo\n" +
                 "📅 Año\n\n" +
                 "Ejemplo:\n" +
-                "*Toyota Hilux 2021*";
+                "*Toyota Hilux 2021*\n\n" +
+                "Un asesor puede confirmar disponibilidad, precio final, instalación, envío y promociones vigentes.";
 
             await SendTextMessage(to, text);
+
+            await Task.Delay(700);
+            await SendAdvisorCtaMessage(to);
         }
 
         private async Task SendTireSizeResponse(string to, string tireSize)
@@ -415,180 +360,11 @@ namespace WhatsAppBotApi.Controllers
                 "3️⃣ ¿Requieres instalación?\n\n" +
                 "Ejemplo:\n" +
                 "*4 llantas, CDMX, con instalación*\n\n" +
-                "Un asesor puede confirmar disponibilidad, precio final, envío y promociones vigentes.";
+                "Un asesor puede confirmar disponibilidad, precio final y promociones.";
 
             await SendTextMessage(to, text);
-        }
 
-        // =========================================
-        // SUCURSALES
-        // =========================================
-        private async Task SendBranchSearchMessage(string to)
-        {
-            var text =
-                "📍 *Buscar sucursal Auto Tyre*\n\n" +
-                "Tenemos cobertura nacional con más de 60 puntos de atención.\n\n" +
-                "Para ayudarte a encontrar la sucursal más cercana, envíame:\n\n" +
-                "📌 Ciudad o estado\n" +
-                "📌 Código postal, si lo tienes\n\n" +
-                "Ejemplo:\n" +
-                "*Mérida, Yucatán*\n\n" +
-                "También puedes escribir *Contactar asesor* para que una persona te apoye.";
-
-            await SendTextMessage(to, text);
-        }
-
-        // =========================================
-        // FLOTILLAS
-        // =========================================
-        private async Task SendFleetMessage(string to)
-        {
-            var text =
-                "🚚 *Atención a flotillas Auto Tyre*\n\n" +
-                "Ofrecemos soluciones para empresas con unidades operativas:\n\n" +
-                "✅ Suministro de llantas\n" +
-                "✅ Montaje y balanceo\n" +
-                "✅ Alineación\n" +
-                "✅ Suspensión y frenos\n" +
-                "✅ Inspección de seguridad\n" +
-                "✅ Precios preferenciales por volumen\n" +
-                "✅ Asesoría según ruta y tipo de unidad\n\n" +
-                "Para iniciar, envíanos:\n\n" +
-                "🏢 Nombre de empresa\n" +
-                "🚚 Número de unidades\n" +
-                "📍 Ciudad/estado\n" +
-                "📞 Nombre y teléfono de contacto\n\n" +
-                "Ejemplo:\n" +
-                "*Transportes del Norte, 35 unidades, Monterrey, Carlos 55...*";
-
-            await SendTextMessage(to, text);
-        }
-
-        // =========================================
-        // FRANQUICIAS / EXPANSIÓN
-        // =========================================
-        private async Task SendFranchiseMessage(string to)
-        {
-            var payload = new
-            {
-                messaging_product = "whatsapp",
-                to,
-                type = "interactive",
-                interactive = new
-                {
-                    type = "list",
-                    header = new
-                    {
-                        type = "text",
-                        text = "Franquicias"
-                    },
-                    body = new
-                    {
-                        text =
-                            "🏁 *Expansión Auto Tyre*\n\n" +
-                            "Selecciona el modelo de franquicia que deseas conocer:"
-                    },
-                    footer = new
-                    {
-                        text = "Auto Tyre - Modelo de negocio"
-                    },
-                    action = new
-                    {
-                        button = "Ver modelos",
-                        sections = new[]
-                        {
-                            new
-                            {
-                                title = "Modelos disponibles",
-                                rows = new[]
-                                {
-                                    new
-                                    {
-                                        id = "franquicia_express",
-                                        title = "Modelo Express",
-                                        description = "Desde $1,800,000 + IVA"
-                                    },
-                                    new
-                                    {
-                                        id = "franquicia_premium",
-                                        title = "Modelo Premium",
-                                        description = "Desde $2,218,000 + IVA"
-                                    },
-                                    new
-                                    {
-                                        id = "franquicia_diamante",
-                                        title = "Modelo Diamante",
-                                        description = "Desde $3,013,000 + IVA"
-                                    },
-                                    new
-                                    {
-                                        id = "franquicia_movil",
-                                        title = "Modelo móvil",
-                                        description = "Desde $879,000 + IVA"
-                                    },
-                                    new
-                                    {
-                                        id = "contactar_asesor",
-                                        title = "Contactar asesor",
-                                        description = "Hablar con expansión"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            await SendPayload(payload, "Franchise menu response");
-        }
-
-        // =========================================
-        // DETALLE DE MODELOS DE FRANQUICIA
-        // =========================================
-        private async Task SendFranchiseModelDetail(string to, string model)
-        {
-            string text = model switch
-            {
-                "franquicia_express" =>
-                    "🏁 *Modelo Express Auto Tyre*\n\n" +
-                    "💰 Inversión estimada: *$1,800,000 + IVA*\n" +
-                    "📐 Espacio requerido: *80 a 120 m²*\n" +
-                    "🛞 Inventario inicial: *150 llantas*\n" +
-                    "🏗️ Ideal para zonas urbanas de alto flujo.\n\n" +
-                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
-
-                "franquicia_premium" =>
-                    "⭐ *Modelo Premium Auto Tyre*\n\n" +
-                    "💰 Inversión estimada: *$2,218,000 + IVA*\n" +
-                    "📐 Espacio requerido: *150 a 200 m²*\n" +
-                    "🛞 Inventario inicial: *200 llantas*\n" +
-                    "🛋️ Incluye sala de espera.\n\n" +
-                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
-
-                "franquicia_diamante" =>
-                    "💎 *Modelo Diamante Auto Tyre*\n\n" +
-                    "💰 Inversión estimada: *$3,013,000 + IVA*\n" +
-                    "📐 Espacio requerido: *200 a 350 m²*\n" +
-                    "🛞 Inventario inicial: *250 llantas*\n" +
-                    "🏗️ Mayor capacidad operativa y servicios especializados.\n\n" +
-                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
-
-                "franquicia_movil" =>
-                    "🚐 *Modelo Móvil Auto Tyre*\n\n" +
-                    "💰 Inversión estimada: *$879,000 + IVA*\n" +
-                    "✅ Puesta a punto de camioneta\n" +
-                    "✅ Equipos\n" +
-                    "✅ Imagen corporativa\n" +
-                    "✅ Red de franquicias\n\n" +
-                    "⚠️ No incluye la camioneta.\n\n" +
-                    "Para iniciar el proceso selecciona *Contactar asesor* desde el menú.",
-
-                _ =>
-                    "Selecciona un modelo válido desde el menú de franquicias."
-            };
-
-            await SendTextMessage(to, text);
-            await Task.Delay(600);
+            await Task.Delay(700);
             await SendAdvisorCtaMessage(to);
         }
 
@@ -599,20 +375,23 @@ namespace WhatsAppBotApi.Controllers
         {
             var text =
                 "🛟 *Auxilio vial Auto Tyre*\n\n" +
-                "Para apoyarte necesitamos algunos datos:\n\n" +
-                "1️⃣ Ubicación actual o referencia\n" +
-                "2️⃣ Tipo de problema\n" +
-                "3️⃣ Tipo de vehículo\n" +
-                "4️⃣ Teléfono de contacto\n\n" +
+                "Para apoyarte lo más rápido posible, envíanos estos datos:\n\n" +
+                "📍 Ubicación actual o referencia\n" +
+                "🛞 Tipo de problema\n" +
+                "🚗 Tipo de vehículo\n" +
+                "📞 Teléfono de contacto\n\n" +
                 "Ejemplo:\n" +
                 "*Estoy en Periférico Sur, llanta ponchada, camioneta SUV, 55...*\n\n" +
-                "Un asesor revisará disponibilidad de apoyo en tu zona.";
+                "Un asesor revisará la disponibilidad de apoyo en tu zona.";
 
             await SendTextMessage(to, text);
+
+            await Task.Delay(700);
+            await SendAdvisorCtaMessage(to);
         }
 
         // =========================================
-        // CONTACTAR ASESOR - BOTÓN PROFESIONAL CTA URL
+        // CONTACTAR ASESOR - BOTÓN CTA URL
         // =========================================
         private async Task SendAdvisorCtaMessage(string to)
         {
@@ -639,18 +418,18 @@ namespace WhatsAppBotApi.Controllers
                     body = new
                     {
                         text =
-                            "👨‍💼 *Contactar asesor Auto Tyre*\n\n" +
+                            "👨‍💼 *Atención personalizada Auto Tyre*\n\n" +
                             "Un asesor puede apoyarte con:\n\n" +
-                            "🔎 Cotización de llantas\n" +
+                            "🛞 Cotización de llantas\n" +
                             "📍 Sucursal más cercana\n" +
                             "🚚 Flotillas\n" +
-                            "🏁 Franquicias\n" +
-                            "🛟 Auxilio vial\n\n" +
+                            "🛟 Auxilio vial\n" +
+                            "🏁 Franquicias\n\n" +
                             "Presiona el botón para abrir el chat directo con un asesor."
                     },
                     footer = new
                     {
-                        text = "Atención personalizada Auto Tyre"
+                        text = "Respuesta por WhatsApp"
                     },
                     action = new
                     {
@@ -689,7 +468,6 @@ namespace WhatsAppBotApi.Controllers
 
         // =========================================
         // ENVÍO DE IMAGEN OPCIONAL
-        // Úsalo solo si tienes una URL pública válida.
         // =========================================
         private async Task SendWelcomeImage(string to)
         {
